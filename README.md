@@ -36,8 +36,9 @@ cd onclusive/scripts
 
 **Calculations**: The script calculates total requests, total data transmitted, percentages of each status code class, and identifies the most requested resource and remote host with the most requests.
 
-**Functions**: It defines a function calculate_percentage to calculate percentages.
-Dependencies: The script relies on standard UNIX utilities such as `awk` and `bc`.
+**Functions**: It defines a function `calculate_percentage` to calculate percentages.
+
+**Dependencies**: The script relies on standard UNIX utilities such as `awk` and `bc`.
 
 ### Example
 
