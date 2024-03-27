@@ -17,6 +17,14 @@ status_3xx=0
 status_4xx=0
 status_5xx=0
 
+# Function to calculate percentage
+calculate_percentage() {
+    local part=$1
+    local total=$2
+    local percentage=$(echo "scale=10; $part / $total * 100" | bc)
+    printf "%.10f" "$percentage"
+}
+
 # Read log file line by line
 while IFS= read -r line; do
     # Parse line using awk
@@ -24,13 +32,14 @@ while IFS= read -r line; do
     status=$(echo "$line" | awk '{print $9}')
     host=$(echo "$line" | awk '{print $1}')
 
-    # Check if parsing successful, if not, skip line
-    if [ -z "$request" ] || [ -z "$status" ] || [ -z "$host" ]; then
-        continue
-    fi
-
     # Increment total requests count
     ((total_requests++))
+
+    # Count resource requests
+    ((resource_counts[$request]++))
+
+    # Count host requests
+    ((host_counts[$host]++))
 
     # Calculate total data transmitted
     data=$(echo "$line" | awk '{print $10}')
@@ -61,37 +70,11 @@ while IFS= read -r line; do
             ;;
     esac
 
-    # Count resource requests
-    if [ -n "${resource_counts[$request]}" ]; then
-        ((resource_counts[$request]++))
-    else
-        resource_counts[$request]=1
-    fi
-
-    # Count host requests
-    if [ -n "${host_counts[$host]}" ]; then
-        ((host_counts[$host]++))
-    else
-        host_counts[$host]=1
-    fi
-
 done < "$1"
 
-# Calculate percentages
+# Calculate Total size in GiB
 total_size_gb=$(echo "scale=2; $total_data / (1024 * 1024 * 1024)" | bc)
 total_size_gb=$(printf "%.2f" "$total_size_gb")
-
-# Function to calculate percentage
-calculate_percentage() {
-    local part=$1
-    local total=$2
-    local percentage=$(echo "scale=10; $part / $total * 100" | bc)
-    printf "%.10f" "$percentage"
-}
-
-# Print statistics
-echo "Total Requests: $total_requests"
-echo "Total Data transmitted: $total_size_gb GiB"
 
 # Find most requested resource
 most_requested_resource=""
@@ -103,11 +86,6 @@ for resource in "${!resource_counts[@]}"; do
     fi
 done
 
-most_requests_percentage=$(calculate_percentage "$most_requests" "$total_requests")
-echo "Most requested resource: $most_requested_resource"
-echo "Total requests for $most_requested_resource: $most_requests"
-echo "Percentage of requests for $most_requested_resource: $most_requests_percentage"
-
 # Find remote host with most requests
 most_requested_host=""
 most_host_requests=0
@@ -118,12 +96,20 @@ for host in "${!host_counts[@]}"; do
     fi
 done
 
+# Print statistics
+echo "Total Requests: $total_requests"
+echo "Total Data transmitted: $total_size_gb GiB"
+
+most_requests_percentage=$(calculate_percentage "$most_requests" "$total_requests")
+echo "Most requested resource: $most_requested_resource"
+echo "Total requests for $most_requested_resource: $most_requests"
+echo "Percentage of requests for $most_requested_resource: $most_requests_percentage"
+
 most_host_requests_percentage=$(calculate_percentage "$most_host_requests" "$total_requests")
 echo "Remote host with the most requests: $most_requested_host"
 echo "Total requests from $most_requested_host: $most_host_requests"
 echo "Percentage of requests from $most_requested_host: $most_host_requests_percentage"
 
-# Print status code percentages
 status_1xx_percentage=$(calculate_percentage "$status_1xx" "$total_requests")
 status_2xx_percentage=$(calculate_percentage "$status_2xx" "$total_requests")
 status_3xx_percentage=$(calculate_percentage "$status_3xx" "$total_requests")
