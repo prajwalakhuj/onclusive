@@ -110,14 +110,8 @@ echo "Remote host with the most requests: $most_requested_host"
 echo "Total requests from $most_requested_host: $most_host_requests"
 echo "Percentage of requests from $most_requested_host: $most_host_requests_percentage"
 
-status_1xx_percentage=$(calculate_percentage "$status_1xx" "$total_requests")
-status_2xx_percentage=$(calculate_percentage "$status_2xx" "$total_requests")
-status_3xx_percentage=$(calculate_percentage "$status_3xx" "$total_requests")
-status_4xx_percentage=$(calculate_percentage "$status_4xx" "$total_requests")
-status_5xx_percentage=$(calculate_percentage "$status_5xx" "$total_requests")
-
-echo "Percentage of 1xx requests: $status_1xx_percentage"
-echo "Percentage of 2xx requests: $status_2xx_percentage"
-echo "Percentage of 3xx requests: $status_3xx_percentage"
-echo "Percentage of 4xx requests: $status_4xx_percentage"
-echo "Percentage of 5xx requests: $status_5xx_percentage"
+echo "Percentage of 1xx requests: $(calculate_percentage "$status_1xx" "$total_requests")"
+echo "Percentage of 2xx requests: $(calculate_percentage "$status_2xx" "$total_requests")"
+echo "Percentage of 3xx requests: $(calculate_percentage "$status_3xx" "$total_requests")"
+echo "Percentage of 4xx requests: $(calculate_percentage "$status_4xx" "$total_requests")"
+echo "Percentage of 5xx requests: $(calculate_percentage "$status_5xx" "$total_requests")"
